@@ -1,0 +1,10 @@
+project: default
+source:
+  repoURL: 'https://github.com/soura49/EKSSetup'
+  path: application
+  targetRevision: main
+destination:
+  server: 'https://D452BC15697B986FC4872DAD6E2D1FCC.gr7.us-west-2.eks.amazonaws.com'
+  namespace: default
+syncPolicy:
+  automated: {}
