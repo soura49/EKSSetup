@@ -26,7 +26,7 @@ data "aws_eks_cluster_auth" "this" {
 data "aws_availability_zones" "available" {}
 
 locals {
-  name   = "argocd-poc"
+  name   = basename(path.cwd)
   region = "us-east-1"
 
   vpc_cidr = "10.0.0.0/16"
@@ -75,24 +75,6 @@ module "eks_blueprints_kubernetes_addons" {
   eks_cluster_version  = module.eks_blueprints.eks_cluster_version
 
   enable_argocd = true
-  # This example shows how to set default ArgoCD Admin Password using SecretsManager with Helm Chart set_sensitive values.
-  argocd_helm_config = {
-    set_sensitive = [
-      {
-        name  = "configs.secret.argocdServerAdminPassword"
-        value = "argocdpoc"
-      }
-    ]
-  }
-
-  keda_helm_config = {
-    values = [
-      {
-        name  = "serviceAccount.create"
-        value = "false"
-      }
-    ]
-  }
 
   argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying add-ons
   argocd_applications = {
@@ -110,6 +92,9 @@ module "eks_blueprints_kubernetes_addons" {
 
   # Add-ons
   enable_amazon_eks_aws_ebs_csi_driver = true
+  enable_amazon_eks_vpc_cni = true
+  enable_amazon_eks_coredns = true
+  enable_amazon_eks_kube_proxy = true
   enable_aws_for_fluentbit             = true
   # Let fluentbit create the cw log group
   aws_for_fluentbit_create_cw_log_group = false
@@ -128,32 +113,6 @@ module "eks_blueprints_kubernetes_addons" {
   tags = local.tags
 }
 
-#---------------------------------------------------------------
-# ArgoCD Admin Password credentials with Secrets Manager
-# Login to AWS Secrets manager with the same role as Terraform to extract the ArgoCD admin password with the secret name as "argocd"
-#---------------------------------------------------------------
-resource "random_password" "argocd" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-}
-
-# Argo requires the password to be bcrypt, we use custom provider of bcrypt,
-# as the default bcrypt function generates diff for each terraform plan
-resource "bcrypt_hash" "argo" {
-  cleartext = random_password.argocd.result
-}
-
-#tfsec:ignore:aws-ssm-secret-use-customer-key
-resource "aws_secretsmanager_secret" "arogcd" {
-  name                    = "argocd"
-  recovery_window_in_days = 0 # Set to zero for this example to force delete during Terraform destroy
-}
-
-resource "aws_secretsmanager_secret_version" "arogcd" {
-  secret_id     = aws_secretsmanager_secret.arogcd.id
-  secret_string = random_password.argocd.result
-}
 
 #---------------------------------------------------------------
 # Supporting Resources
