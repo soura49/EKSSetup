@@ -76,39 +76,28 @@ module "eks_blueprints_kubernetes_addons" {
 
   enable_argocd = true
 
-  argocd_manage_add_ons = true # Indicates that ArgoCD is responsible for managing/deploying add-ons
-  argocd_applications = {
-    addons = {
-      path               = "chart"
-      repo_url           = "https://github.com/aws-samples/eks-blueprints-add-ons.git"
-      add_on_application = true
-    }
-    workloads = {
-      path               = "envs/dev"
-      repo_url           = "https://github.com/aws-samples/eks-blueprints-workloads.git"
-      add_on_application = false
-    }
+  argocd_helm_config = {
+    values = [templatefile("argocd-values.yaml", {})]
   }
-
   # Add-ons
   enable_amazon_eks_aws_ebs_csi_driver = true
   enable_amazon_eks_vpc_cni = true
   enable_amazon_eks_coredns = true
   enable_amazon_eks_kube_proxy = true
-  enable_aws_for_fluentbit             = true
+  /* enable_aws_for_fluentbit             = true
   # Let fluentbit create the cw log group
   aws_for_fluentbit_create_cw_log_group = false
   enable_cert_manager                   = true
   enable_cluster_autoscaler             = true
   enable_karpenter                      = true
-  enable_keda                           = true
-  enable_metrics_server                 = true
-  enable_prometheus                     = true
-  enable_traefik                        = true
-  enable_vpa                            = true
-  enable_yunikorn                       = true
-  enable_argo_rollouts                  = true
-  enable_argo_workflows                 = true
+  enable_keda                           = true */
+  /* enable_metrics_server                 = true */
+  /* enable_prometheus                     = true
+  enable_traefik                        = true */
+  /* enable_vpa                            = true
+  enable_yunikorn                       = true */
+  /* enable_argo_rollouts                  = true
+  enable_argo_workflows                 = true */
 
   tags = local.tags
 }

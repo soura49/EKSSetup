@@ -23,11 +23,4 @@ terraform {
       version = ">= 0.1.2"
     }
   }
-
-  ##  Used for end-to-end testing on project; update to suit your needs
-  backend "s3" {
-    bucket = "eksterraformbucket"
-    region = "us-east-1"
-    key    = "e2e/argocd/terraform.tfstate"
-  }
 }
